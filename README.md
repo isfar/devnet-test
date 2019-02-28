@@ -8,7 +8,15 @@ git clone git@github.com:isfar/devnet-test.git
 ```bash
 vagrant up --provision
 ```
-4. Run the MO consumer
+3. Composer install
+```bash
+vagrant ssh -c 'composer install'
+```
+4. Turn on development mode
+```bash
+vagrant ssh -c 'composer development-enable'
+```
+5. Run the MO consumer in a standalone shell
 ```bash
 vagrant ssh -c 'php public/index.php mo-consumer'
 ```
@@ -21,7 +29,7 @@ vagrant ssh -c 'php public/index.php mo-unprocessed-count'
 ```
 2. Run the script for deleting unprocessed MO's
 ```bash
-vagrant ssh -c 'php public/index.php mo-unprocessed-count'
+vagrant ssh -c 'php public/index.php mo-remove-unprocessed'
 ```
 
 
