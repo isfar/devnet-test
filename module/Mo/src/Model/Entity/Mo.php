@@ -39,6 +39,11 @@ class Mo
      * @var \DateTime
      */
     protected $createdAt; 
+    /**
+     * @Column(name="is_processed", type="boolean")
+     * @var boolean
+     */
+    protected $isProcessed; 
 
     public function setId(int $id): Mo {
         $this->id = $id;
@@ -100,5 +105,14 @@ class Mo
 
     public function getCreatedAt(): \DateTime {
         return $this->createdAt;
+    }
+
+    public function setProcessed(bool $value): Mo {
+        $this->isProcessed = $value;
+        return $this;
+    }
+
+    public function isProcessed(): bool {
+        return $this->isProcessed;
     }
 }

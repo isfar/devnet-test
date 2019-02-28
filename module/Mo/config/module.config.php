@@ -31,6 +31,16 @@ return [
                     ],
                 ],
             ],
+            'stats' => [
+                'type' => Literal::class,
+                'options' => [
+                    'route' => '/stats',
+                    'defaults' => [
+                        'controller' => Controller\MoController::class,
+                        'action' => 'stats',
+                    ],
+                ],
+            ],
         ],
     ],
     'console' => [
@@ -45,7 +55,27 @@ return [
                             'action' => 'index',
                         ],
                     ],
-                ]
+                ],
+                'mo-unprocessed-count' => [
+                    'type' => 'simple',
+                    'options' => [
+                        'route' => 'mo-unprocessed-count',
+                        'defaults' => [
+                            'controller' => Controller\MoController::class,
+                            'action' => 'get-unprocessed-count',
+                        ],
+                    ],
+                ],
+                'mo-remove-unprocessed' => [
+                    'type' => 'simple',
+                    'options' => [
+                        'route' => 'mo-remove-unprocessed',
+                        'defaults' => [
+                            'controller' => Controller\MoController::class,
+                            'action' => 'remove-unprocessed',
+                        ],
+                    ],
+                ],
             ],
         ],
     ],
@@ -73,7 +103,8 @@ return [
                     $config['hostname'], $config['port'], $config['username'], $config['password']
                 );
                 return $connection;
-            }
+            },
+            \Mo\Queue\MoSaveQueue::class => \Mo\Queue\Factory\MoSaveQueueFactory::class,
         ],
     ],
     'db' => [

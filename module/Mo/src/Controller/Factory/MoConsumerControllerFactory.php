@@ -13,7 +13,7 @@ class MoConsumerControllerFactory implements FactoryInterface
     {
         $moConsumerController = new MoConsumerController();
         $moConsumerController->setEntityManager($sm->get(\Doctrine\ORM\EntityManager::class));
-        $moConsumerController->setAmqpConnection($sm->get(\PhpAmqpLib\Connection\AMQPStreamConnection::class));
+        $moConsumerController->setQueue($sm->get(\Mo\Queue\MoSaveQueue::class));
         return $moConsumerController;
     }
 }

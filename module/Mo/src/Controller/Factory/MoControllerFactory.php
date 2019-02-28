@@ -13,7 +13,7 @@ class MoControllerFactory implements FactoryInterface
     {
         $moController = new MoController();
         $moController->setEntityManager($sm->get(\Doctrine\ORM\EntityManager::class));
-        $moController->setAmqpConnection($sm->get(\PhpAmqpLib\Connection\AMQPStreamConnection::class));
+        $moController->setQueue($sm->get(\Mo\Queue\MoSaveQueue::class));
         return $moController;
     }
 }

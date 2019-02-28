@@ -8,23 +8,18 @@ class MoConsumerController extends AbstractActionController
 {
     protected $_entityManager;
     protected $_amqpConnection;
+    protected $_queue;
 
     public function indexAction()
     {
-        $connection = $this->getAmqpConnection();
-        $channel = $connection->channel();
-
-        $channel->queue_declare('mo_save', false, false, false, false);
-
-        $channel->basic_consume('mo_save', '', false, true, false, false, [$this, 'save']);
-
-        while (count($channel->callbacks)) {
-            $channel->wait();
-        }
+        $queue = $this->getQueue();
+        $queue->init();
+        $queue->consume([$this, 'save']);
+        $queue->wait();
     }
 
     public function save($message) {
-        $params= json_decode($message->body);
+        $params = json_decode($message->body);
 
         $mo = new \Mo\Model\Entity\Mo();
 
@@ -33,7 +28,8 @@ class MoConsumerController extends AbstractActionController
             ->setOperatorId($params->operatorid)
             ->setShortcodeId($params->shortcodeid)
             ->setText($params->text)
-            ->setCreatedAt(new \DateTime('now'));
+            ->setCreatedAt(new \DateTime('now'))
+            ->setProcessed(true);
 
         $this->getEntityManager()->persist($mo);
         $this->getEntityManager()->flush();
@@ -59,13 +55,13 @@ class MoConsumerController extends AbstractActionController
     public function getEntityManager(): \Doctrine\ORM\EntityManagerInterface {
         return $this->_entityManager;
     }
-    
-    public function setAmqpConnection(\PhpAmqpLib\Connection\AbstractConnection $conn) {
-        $this->_amqpConnection = $conn;
+
+    public function setQueue(\Mo\Queue\QueueInterface $queue) {
+        $this->_queue = $queue;
         return $this;
     }
 
-    public function getAmqpConnection(): \PhpAmqpLib\Connection\AbstractConnection {
-        return $this->_amqpConnection;
+    public function getQueue(): \Mo\Queue\QueueInterface {
+        return $this->_queue;
     }
 }
