@@ -5,15 +5,14 @@
  * @license   http://framework.zend.com/license/new-bsd New BSD License
  */
 
-/**
- * List of enabled modules for this application.
- *
- * This should be an array of module namespaces used in the application.
- */
-return [
-    'Zend\Mvc\Console',
-    'Zend\Router',
-    'Zend\Validator',
-    'Application',
-    'Mo',
-];
+namespace Mo;
+
+class Module
+{
+    const VERSION = '3.0.3-dev';
+
+    public function getConfig()
+    {
+        return include __DIR__ . '/../config/module.config.php';
+    }
+}

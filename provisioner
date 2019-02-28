@@ -1,0 +1,44 @@
+#!/usr/bin/env bash
+export DEBIAN_FRONTEND=noninteractive
+
+installpkg(){
+    dpkg-query --status $1 >/dev/null || apt-get install -y $1
+}
+
+apt-get update
+installpkg apache2
+installpkg apache2-utils
+installpkg apache2-suexec-custom
+installpkg redis-server
+installpkg mysql-server
+
+bootstrapdb(){
+    mysql_secret=$(sudo awk '/password/{print $NF}' /etc/mysql/debian.cnf | tail -1)
+    cat <<EOF | mysql -u debian-sys-maint --password=${mysql_secret}
+    CREATE USER 'test'@'localhost' IDENTIFIED BY '123456';
+    GRANT ALL PRIVILEGES ON *.* TO 'test'@'localhost' WITH GRANT OPTION;
+    FLUSH PRIVILEGES;
+    DROP DATABASE IF EXISTS testing;
+    CREATE DATABASE testing;
+    USE testing;
+    CREATE TABLE mo (
+      id int NOT NULL auto_increment,
+      msisdn varchar(20),
+      operatorid int,
+      shortcodeid int,
+      text varchar(255),
+      auth_token varchar(60),
+      created_at DATETIME,
+      is_processed tinyint(1) default 0,
+      PRIMARY KEY(id),
+      INDEX(created_at),
+      INDEX(is_processed)
+    ) ;
+EOF
+}
+bootstrapdb
+
+populate_db() {
+    /tmp/populate_db 10000000| mysql -u test -p123456 testing
+}
+populate_db

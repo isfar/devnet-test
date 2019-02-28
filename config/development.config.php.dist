@@ -8,6 +8,13 @@
 return [
     // Additional modules to include when in development mode
     'modules' => [
+        'Zend\Form',
+        'Zend\InputFilter',
+        'Zend\Filter',
+        'Zend\Hydrator',
+        'Zend\Serializer',
+        'Zend\I18n',
+        'Zend\Log',
     ],
     // Configuration overrides during development mode
     'module_listener_options' => [

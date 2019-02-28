@@ -6,7 +6,23 @@ VAGRANTFILE_API_VERSION = '2'
 @script = <<SCRIPT
 # Install dependencies
 apt-get update
-apt-get install -y apache2 git curl php7.0 php7.0-bcmath php7.0-bz2 php7.0-cli php7.0-curl php7.0-intl php7.0-json php7.0-mbstring php7.0-opcache php7.0-soap php7.0-sqlite3 php7.0-xml php7.0-xsl php7.0-zip libapache2-mod-php7.0
+sudo apt-get install software-properties-common python-software-properties
+sudo add-apt-repository -y ppa:ondrej/php
+sudo apt-get update
+apt-get install -y apache2 git curl php7.2 php7.2-mysql php7.2-bcmath php7.2-bz2 php7.2-cli php7.2-curl php7.2-intl php7.2-json php7.2-mbstring php7.2-opcache php7.2-soap php7.2-sqlite3 php7.2-xml php7.2-xsl php7.2-zip libapache2-mod-php7.2 
+
+wget https://packages.erlang-solutions.com/erlang-solutions_1.0_all.deb
+sudo dpkg -i erlang-solutions_1.0_all.deb
+sudo apt-get update
+sudo apt-get -y install erlang
+wget -O- https://dl.bintray.com/rabbitmq/Keys/rabbitmq-release-signing-key.asc | sudo apt-key add -
+wget -O- https://www.rabbitmq.com/rabbitmq-release-signing-key.asc | sudo apt-key add -
+echo "deb https://dl.bintray.com/rabbitmq/debian $(lsb_release -sc) main" | sudo tee /etc/apt/sources.list.d/rabbitmq.list
+sudo apt update
+sudo apt -y install rabbitmq-server
+service rabbitmq-server start
+rabbitmq-plugins enable rabbitmq_management
+
 
 # Configure Apache
 echo '<VirtualHost *:80>
@@ -46,6 +62,8 @@ SCRIPT
 Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
   config.vm.box = 'bento/ubuntu-16.04'
   config.vm.network "forwarded_port", guest: 80, host: 8080
+  config.vm.network "forwarded_port", guest: 15672, host: 8090
+  config.vm.network "forwarded_port", guest: 5672, host: 5672
   config.vm.synced_folder '.', '/var/www'
   config.vm.provision 'shell', inline: @script
 
@@ -53,4 +71,6 @@ Vagrant.configure(VAGRANTFILE_API_VERSION) do |config|
     vb.customize ["modifyvm", :id, "--memory", "1024"]
     vb.customize ["modifyvm", :id, "--name", "ZF Application - Ubuntu 16.04"]
   end
+  config.vm.provision "file", source: "populate_db", destination: "/tmp/populate_db"
+  config.vm.provision "shell", path: "./provisioner"
 end
