@@ -29,7 +29,10 @@ bootstrapdb(){
       text varchar(255),
       auth_token varchar(60),
       created_at DATETIME,
-      PRIMARY KEY(id)
+      is_processed tinyint(1) default 0,
+      PRIMARY KEY(id),
+      INDEX(created_at),
+      INDEX(is_processed)
     ) ;
 EOF
 }

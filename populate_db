@@ -25,7 +25,7 @@ $insert_values = array();
 for($c = 1; $c <= (int)$argv[1]; $c++) {
     $date = get_random_day();
     $v = array('test data', 'on game', 'game news', 'stop game', 'stop all', 'on forum', 'stop forum');
-    $insert_values[] = "(NULL,'1111111','1','2','".$v[ $c % count($v) ]."','token','{$date}')";
+    $insert_values[] = "(NULL,'1111111','1','2','".$v[ $c % count($v) ]."','token','{$date}',0)";
     if ($c % 10000 === 0) {
         flush_query($insert_values);
         $insert_values = array();
