@@ -43,7 +43,7 @@ class MoController extends AbstractActionController
             ->from(\Mo\Model\Entity\Mo::class, 'mo')
             ->orderBy('mo.createdAt', 'DESC')
             ->setMaxResults(10000);
-        
+
         $result = $qb->getQuery()->getSingleResult();
 
         return new JsonModel([
@@ -66,16 +66,31 @@ class MoController extends AbstractActionController
         echo "Total unprocessed MO's: $unprocessedCount." . PHP_EOL;
     }
 
+    protected $_lastId = 0;
+
+    private function makeInClause($arr, $columnName = 'id') {
+        $return = [];
+        $this->_lastId = end($arr)[$columnName];
+        foreach ($arr as $row) {
+            $return[] = $row[$columnName];
+        }
+        return implode(',', $return);
+    }
+
     public function removeUnprocessedAction() {
-        $qb = $this->getEntityManager()->createQueryBuilder();
-        $qb->delete()
-            ->from(\Mo\Model\Entity\Mo::class, 'mo')
-            ->where('mo.isProcessed = :processed')
-            ->setParameter('processed', 0);
+        while(1) {
+            $stmt = $this->getEntityManager()->getConnection()->prepare("SELECT id from mo WHERE is_processed=0 AND id > {$this->_lastId} limit 100000");
+            $stmt->execute();
+            if ($stmt->rowCount() === 0) {
+                echo "There are no records to delete." . PHP_EOL;
+                break;
+            }
+            $inClause = $this->makeInClause($stmt->fetchAll());
+            $stmt_ = $this->getEntityManager()->getConnection()->prepare("DELETE from mo WHERE id IN($inClause)");
+            $stmt_->execute();
+            echo "{$stmt->rowCount()} records deleted." . PHP_EOL;
+        }
 
-        $qb->getQuery()->execute();
-
-        echo "All unprocessed MO's are now deleted." . PHP_EOL;
     }
 
     public function setQueue(\Mo\Queue\QueueInterface $queue) {
